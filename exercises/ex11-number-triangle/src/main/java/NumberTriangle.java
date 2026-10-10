@@ -109,7 +109,15 @@ public class NumberTriangle {
     //       value of wherever you ended up. An empty path means "stay here".
     //       Hint: String#charAt(int) and String#length() are all you need for the
     //       iterative version; a recursive version can use String#substring(1).
-    return 0;
+    NumberTriangle current = this;
+    for (int i = 0; i < path.length(); i++) {
+      if (path.charAt(i) == 'l') {
+        current = current.left;
+      } else {
+        current = current.right;
+      }
+    }
+    return current.root;
   }
 
   /**
@@ -171,15 +179,34 @@ public class NumberTriangle {
     //       between iterations of the loop below (for example, the row of
     //       NumberTriangle objects that you built on the previous iteration).
 
+    // The row of NumberTriangle objects built on the previous iteration
+    NumberTriangle[] previousRow = null;
+
     // We need to return the top of the NumberTriangle, so here is a variable for it.
     NumberTriangle top = null;
 
     String line = br.readLine();
     while (line != null) {
 
-      // Remove this line when you are done; it is here so that the starter code
-      // prints the contents of the file when you run it.
-      System.out.println(line);
+      // Build one NumberTriangle per number on this line
+      String[] numbers = line.trim().split("\\s+");
+      NumberTriangle[] currentRow = new NumberTriangle[numbers.length];
+      for (int i = 0; i < numbers.length; i++) {
+        currentRow[i] = new NumberTriangle(Integer.parseInt(numbers[i]));
+      }
+
+      if (previousRow == null) {
+        // First line: this is the top of the triangle
+        top = currentRow[0];
+      } else {
+        // Node i of the previous row gets children i and i + 1 of this row,
+        // so neighbouring nodes share a child (aliasing)
+        for (int i = 0; i < previousRow.length; i++) {
+          previousRow[i].setLeft(currentRow[i]);
+          previousRow[i].setRight(currentRow[i + 1]);
+        }
+      }
+      previousRow = currentRow;
 
       // TODO: process the line. Splitting it on spaces gives you the numbers in
       //       this row; make a NumberTriangle for each one, then wire this row up
