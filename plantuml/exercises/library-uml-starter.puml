@@ -27,19 +27,78 @@ abstract class Item {
   + getCatalogueNumber() : String
 }
 
-' TODO: add boxes for Book and DVD. What differs between them — a whole class,
-'       or just the value of a loan-period field?
+' Only some items can be borrowed, so borrowing lives in an interface
+interface Borrowable {
+  + getLoanPeriodDays() : int
+  + isOnLoan() : boolean
+  + borrow(member : Member) : void
+  + returnItem() : void
+}
 
-' TODO: reference-only items cannot be borrowed at all. Decide how to say that
-'       in the diagram: a subclass, or an interface (e.g. "Borrowable") that
-'       only some items realize?
+class Book {
+  - onLoan : boolean
+  + getLoanPeriodDays() : int
+  + isOnLoan() : boolean
+  + borrow(member : Member) : void
+  + returnItem() : void
+}
 
-' TODO: add Member and Librarian. What do they have in common? Add the common
-'       supertype if you think one is warranted.
+class DVD {
+  - onLoan : boolean
+  + getLoanPeriodDays() : int
+  + isOnLoan() : boolean
+  + borrow(member : Member) : void
+  + returnItem() : void
+}
 
-' TODO: add whatever represents a hold, and connect it to the classes that need
-'       to know about it.
+class ReferenceItem {
+}
 
-' TODO: add the arrows between all of your types.
+class Catalogue {
+  - items : List<Item>
+  + addItem(item : Item) : void
+  + findItem(catalogueNumber : String) : Item
+}
+
+abstract class LibraryUser {
+  - name : String
+  + getName() : String
+}
+
+class Member {
+  - memberNumber : String
+  - lateFee : double
+  + logIn(memberNumber : String) : boolean
+  + placeHold(item : Borrowable) : Hold
+  + getLateFee() : double
+  + setLateFee(fee : double) : void
+}
+
+class Librarian {
+  + addItem(catalogue : Catalogue, item : Item) : void
+  + waiveLateFee(member : Member) : void
+}
+
+class Hold {
+  - member : Member
+  - item : Borrowable
+  + getMember() : Member
+  + getItem() : Borrowable
+}
+
+Item <|-- Book
+Item <|-- DVD
+Item <|-- ReferenceItem
+Borrowable <|.. Book
+Borrowable <|.. DVD
+
+LibraryUser <|-- Member
+LibraryUser <|-- Librarian
+
+Catalogue "1" o-- "*" Item
+Librarian --> Catalogue : adds items to
+Librarian --> Member : waives late fee of
+Member "1" --> "*" Hold : places
+Hold "*" --> "1" Borrowable : on
 
 @enduml
